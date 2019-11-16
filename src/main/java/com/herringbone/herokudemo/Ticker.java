@@ -10,11 +10,11 @@ import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Data
-public class Record {
+public class Ticker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty
-    private String data;
+    private String symbol;
 }
