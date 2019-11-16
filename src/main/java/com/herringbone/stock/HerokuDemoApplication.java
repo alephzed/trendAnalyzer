@@ -1,4 +1,4 @@
-package com.herringbone.herokudemo;
+package com.herringbone.stock;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

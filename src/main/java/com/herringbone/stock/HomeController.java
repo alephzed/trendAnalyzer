@@ -1,5 +1,6 @@
-package com.herringbone.herokudemo;
+package com.herringbone.stock;
 
+import com.herringbone.stock.model.Ticker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;

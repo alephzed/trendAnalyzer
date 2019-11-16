@@ -27,6 +27,7 @@ dependencies {
     implementation("org.postgresql:postgresql:9.4-1203-jdbc42")
     compileOnly 'org.projectlombok:lombok:1.18.10'
     annotationProcessor 'org.projectlombok:lombok:1.18.10'
+    implementation('org.apache.commons:commons-math:2.0')
 
     testImplementation(platform("org.springframework.boot:spring-boot-dependencies:2.1.8.RELEASE"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
