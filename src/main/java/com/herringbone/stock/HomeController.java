@@ -1,6 +1,7 @@
 package com.herringbone.stock;
 
 import com.herringbone.stock.model.Ticker;
+import com.herringbone.stock.repository.TickerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -18,7 +19,7 @@ import java.util.List;
 public class HomeController {
 
     @Autowired
-    RecordRepository recordRepository;
+    TickerRepository recordRepository;
 
     @GetMapping
     public String home(ModelMap model) {
