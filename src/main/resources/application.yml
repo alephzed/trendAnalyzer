@@ -8,6 +8,17 @@ spring:
           lob:
             non_contextual_creation: true
 
+yahoo:
+  index:
+    symbol: GSPC
+    full:
+      symbol: ^GSPC
+
+web:
+  dailyFile: csv/daily.csv
+  weeklyFile: csv/weekly.csv
+  monthlyFile: csv/monthly.csv
+
 quote:
   scheme: https
   url: finance.yahoo.com

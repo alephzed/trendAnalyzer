@@ -16,7 +16,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/")
-public class HomeController {
+public class ExampleController {
 
     @Autowired
     TickerRepository recordRepository;
