@@ -20,14 +20,14 @@ import java.util.Collections;
 
 @SpringBootApplication
 @EnableCaching
-public class HerokuDemoApplication {
+public class QuoteEngineApplication {
 
     private int webserviceTimeout = 20000;
 
     private int maxTotal = 1;
 
     public static void main(String[] args) {
-        SpringApplication.run(HerokuDemoApplication.class, args);
+        SpringApplication.run(QuoteEngineApplication.class, args);
     }
 
     @Bean

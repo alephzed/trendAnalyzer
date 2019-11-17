@@ -1,0 +1,35 @@
+{
+  "name": "QuoteEngine",
+  "version": "0.1.0",
+  "description": "React interface for the front end",
+  "keywords": [
+    "rest",
+    "hateoas",
+    "spring",
+    "data",
+    "react"
+  ],
+  "author": "Adam Lee",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@babel/core": "^7.5.5",
+    "react": "^15.6.2",
+    "react-dom": "^15.6.2",
+    "react-router-dom": "^5.0.1",
+    "rest": "^1.3.1",
+    "sockjs-client": "^1.0.3",
+    "stompjs": "^2.3.3",
+    "webpack": "^1.12.2"
+  },
+  "scripts": {
+    "watch": "webpack --watch -d"
+  },
+  "devDependencies": {
+    "@babel/preset-react": "^7.0.0",
+    "babel-core": "^6.18.2",
+    "babel-loader": "^6.2.7",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1"
+  }
+}
