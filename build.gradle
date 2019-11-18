@@ -119,4 +119,13 @@ task webpack(type: NodeTask, dependsOn: 'npmInstall') {
     script = project.file('node_modules/.bin/webpack')
 }
 
+task bootRunPostgres(type: org.springframework.boot.gradle.tasks.run.BootRun) {
+    dependsOn tasks.withType(AbstractCompile)
+    doFirst() {
+        main = 'com.herringbone.stock.QuoteEngineApplication'
+        classpath = sourceSets.main.runtimeClasspath
+        systemProperty 'spring.profiles.active', 'postgres'
+    }
+}
+
 build.dependsOn(npm_install)

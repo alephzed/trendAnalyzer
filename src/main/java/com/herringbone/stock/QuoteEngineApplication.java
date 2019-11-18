@@ -14,7 +14,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
@@ -24,7 +23,7 @@ import java.util.Collections;
 @SpringBootApplication
 @EnableCaching
 @EnableTransactionManagement
-@EnableAsync
+//@EnableAsync
 @EnableScheduling
 public class QuoteEngineApplication {
 

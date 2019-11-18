@@ -235,9 +235,9 @@ public class ZonedDateTracker {
             isMemorialDayHoliday = true;
         }
         // pre 1970 rule
-        if (((dayInMonth == 30 || dayInMonth == 31 )&& dayInWeek == DayOfWeek.MONDAY)
+        if ((dayInMonth == 30 || (dayInMonth == 31 && dayInWeek == DayOfWeek.MONDAY)
                 || (dayInMonth == 30 && dayInWeek == DayOfWeek.FRIDAY)
-                || (dayInMonth == 29 && dayInWeek == DayOfWeek.FRIDAY) && currentYear <= 1970) {
+                || (dayInMonth == 29 && dayInWeek == DayOfWeek.FRIDAY)) && currentYear < 1970) {
             isMemorialDayHoliday = true;
         }
         return isMemorialDayHoliday;

@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:postgresql://localhost:5000/quotedb
+    username: postgres
+    password: quotedb
+#    url: jdbc:postgresql://localhost:5432/spring-boot-heroku-example
+#    username: spring-boot-heroku-example
+#    password: spring-boot-heroku-example
+    driver-class-name: org.postgresql.Driver
