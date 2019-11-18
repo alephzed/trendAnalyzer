@@ -74,7 +74,9 @@ public class CookieService {
                 try {
                     byte[] utf8Bytes = s.getBytes("UTF8");
                     String converted = new String(utf8Bytes, "UTF8");
-                    return converted;
+                    String replaced = converted.replace("\u002F", "/");
+                    log.info("replaced = {}", replaced);
+                    return replaced;
                 } catch (Exception e) {
                     log.info("failed to getBytes");
                 }

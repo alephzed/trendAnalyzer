@@ -127,5 +127,6 @@ task bootRunPostgres(type: org.springframework.boot.gradle.tasks.run.BootRun) {
         systemProperty 'spring.profiles.active', 'postgres'
     }
 }
+processResources.dependsOn 'webpack'
 
-build.dependsOn(npm_install)
+build.dependsOn(webpack)
