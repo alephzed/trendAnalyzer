@@ -5,6 +5,7 @@ plugins {
     id("com.github.kt3k.coveralls") version "2.8.4"
     id("com.palantir.docker-run") version "0.22.1"
     id('com.moowork.node') version "1.3.1"
+    id 'com.google.cloud.tools.jib' version '1.8.0'
 }
 //apply(from = "gradle/git-version-data.gradle")
 //apply(from = "gradle/build-scan-data.gradle")
@@ -127,6 +128,18 @@ task bootRunPostgres(type: org.springframework.boot.gradle.tasks.run.BootRun) {
         systemProperty 'spring.profiles.active', 'postgres'
     }
 }
+
+task bootRunLocal(type: org.springframework.boot.gradle.tasks.run.BootRun) {
+    dependsOn tasks.withType(AbstractCompile)
+    doFirst() {
+        main = 'com.herringbone.stock.QuoteEngineApplication'
+        classpath = sourceSets.main.runtimeClasspath
+        systemProperty 'spring.profiles.active', 'local'
+    }
+}
+
 processResources.dependsOn 'webpack'
 
 build.dependsOn(webpack)
+
+jib.container.jvmFlags = ['-Dspring.profiles.active=postgres']

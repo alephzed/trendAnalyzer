@@ -70,6 +70,9 @@ public class MonthlyQuoteProcessingService implements QuoteLoader {
 
     @Override
     public boolean quoteGatingRule(YahooQuoteBean yahooQuote, QuoteBase lastQuote) {
+        if (lastQuote == null) {
+            return true;
+        }
         return dateTracker.isDifferentDate(yahooQuote.getDate(), lastQuote.getDate())
                 && !(dateTracker.isMarketOpenNow() && dateTracker.isDateToday(yahooQuote.getDate())
                 && dateTracker.inCurrentMonth(yahooQuote.getDate()))

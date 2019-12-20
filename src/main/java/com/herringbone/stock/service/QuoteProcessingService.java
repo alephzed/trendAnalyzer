@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DecimalFormat;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,24 +40,19 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
         this.quoteLoadingFactory = quoteLoadingFactory;
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public void processQuote(YahooQuoteBean yahooQuote, Supplier<QuoteBase> quoteMapper, Period period, Class<T> trendClazz) {
         Ticker ticker = tickerService.getTicker(yahooQuote.getSymbol());
 
         Double lastClose;
         // Get the last quote from the database!
         QuoteBase lastQuote;
-        try {
-            lastQuote = quoteLoadingFactory.getLoader(period).findLatestQuote(ticker.getId());
-        } catch (IndexOutOfBoundsException e) {
-            //This is the case where the lastQuote is null. We need to initialize it
-            log.error("could not find ticker. This should only occur when loading first quote.", e);
-            lastQuote = QuoteBase.builder()
-                    .id(0L).close(0.0).open(0.0)
-                    .date(ZonedDateTime.of(1949, 12, 31, 0, 0, 0, 0, ZoneId.of("UTC")))
-                    .adjclose(0.0).build();
+        lastQuote = quoteLoadingFactory.getLoader(period).findLatestQuote(ticker.getId());
+        if (lastQuote == null) {
+            lastClose = 0.0;
+        } else {
+            lastClose = lastQuote.getClose();
         }
-        lastClose = lastQuote.getClose();
 
         // make sure that the new quote does not have the same date as the last
         // loaded quote
@@ -94,27 +89,24 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
 
             currentQuote.setPeriodType(trendtypeRepository.findByTrendvalue(periodClosingType).get(0));
             currentQuote.setTrendtype(trendtypeRepository.findByTrendvalue(latestTrendType).get(0));
-            Long id = lastQuote.getId();
-            QuoteBase lastBasicQuote = quoteLoadingFactory.getLoader(period).findBasicQuote(id);
-            currentQuote.setPrevPeriod(lastBasicQuote);
-            currentQuote.setLogchange(Math.log(close
-                    / lastQuote.getClose()));
-
-            Double stdDevLogChange = getStdDevLogChange(currentQuote.getLogchange(),
-                    WINDOW_SIZE, false, ticker, period);
-            Double oneStdDev = lastQuote.getClose() * stdDevLogChange;
-
-            Double dayToDayChange = currentQuote.getClose() - lastQuote.getClose();
-            Double spike = dayToDayChange / oneStdDev;
-            currentQuote.setSpike(spike);
-
-            currentQuote.setVolatility(calculateVolatility(currentQuote.getLogchange(), ticker, period));
+            if (lastQuote != null) {
+                Long id = lastQuote.getId();
+                QuoteBase lastBasicQuote = quoteLoadingFactory.getLoader(period).findBasicQuote(id);
+                currentQuote.setPrevPeriod(lastBasicQuote);
+                currentQuote.setLogchange(Math.log(close
+                        / lastQuote.getClose()));
+                Double stdDevLogChange = getStdDevLogChange(currentQuote.getLogchange(),
+                        WINDOW_SIZE, false, ticker, period);
+                Double oneStdDev = lastQuote.getClose() * stdDevLogChange;
+                Double dayToDayChange = currentQuote.getClose() - lastQuote.getClose();
+                Double spike = dayToDayChange / oneStdDev;
+                currentQuote.setSpike(spike);
+                lastQuote.setNextPeriod(quoteLoadingFactory.getLoader(period).findBasicQuote(currentQuote.getId()));
+                quoteLoadingFactory.getLoader(period).saveQuote(lastQuote);
+                currentQuote.setVolatility(calculateVolatility(currentQuote.getLogchange(), ticker, period));
+            }
 
             quoteLoadingFactory.getLoader(period).saveQuote(currentQuote);
-            lastQuote.setNextPeriod(quoteLoadingFactory.getLoader(period).findBasicQuote(currentQuote.getId()));
-            if (lastQuote.getId() > 0) {
-                quoteLoadingFactory.getLoader(period).saveQuote(lastQuote);
-            }
             updateTrend(ticker, period, trendClazz);
 
         }
@@ -172,7 +164,7 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
             }
             // now we have a new trend starting and an old trend ending
             else {
-                T trend = periodTrend.newInstance();
+                T trend = periodTrend.getDeclaredConstructor().newInstance();
                 trend.setTrendtype(currentQuoteTrendType);
                 if (latestTrend != null) {
                     trend.setTrendstart(latestTrend.getTrendend());
@@ -185,10 +177,10 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
                     trend.setPrevioustrend(latestTrend);
                 }
                 trend.setPeriodsInTrendCount(1);
-                Double pointChange = currentQuote.getClose() - endClose;
+                double pointChange = currentQuote.getClose() - endClose;
                 DecimalFormat formatter = new DecimalFormat(PATTERN);
                 String formattedPointChange = formatter.format(pointChange);
-                pointChange = Double.valueOf(formattedPointChange);
+                pointChange = Double.parseDouble(formattedPointChange);
                 trend.setTrendpointchange(pointChange);
                 Double percentageChange = trend.getTrendpointchange() / endClose;
                 trend.setTrendpercentagechange(percentageChange);
@@ -210,19 +202,16 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
             numberQuotesToGet = windowSize - 1;
         }
         List<QuoteBase> results = quoteLoadingFactory.getLoader(period).findQuotesInRange(ticker.getId(), numberQuotesToGet);
-        results.forEach( r -> logMeanWindowStats.addValue(r.getLogchange()));
-        if (useCurrentQuote) {
-            logMeanWindowStats.addValue(logchange);
-        }
-        Double mean = logMeanWindowStats.getMean();
-
-        // calculate the deviation from the mean
         DescriptiveStatistics devSquared = new DescriptiveStatistics();
-        for (QuoteBase result : results) {
-            double devFromMean = result.getLogchange() - mean;
-            double devFromMeanSQ = Math.pow(devFromMean, 2);
-            devSquared.addValue(devFromMeanSQ);
+        results.stream().filter( r -> r.getLogchange() != null).map( r ->  {
+            logMeanWindowStats.addValue(r.getLogchange());
+            return r.getLogchange();
+        }).collect(Collectors.collectingAndThen(Collectors.toList(), list -> { if (useCurrentQuote) {
+            list.add(logchange);
         }
+                    return list;
+        }
+        )).forEach(r-> devSquared.addValue(Math.pow(r - logMeanWindowStats.getMean(), 2)));
         return Math.sqrt(devSquared.getSum()
                 / (logMeanWindowStats.getValues().length - 1));
     }

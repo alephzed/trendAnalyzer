@@ -10,6 +10,7 @@ class DailyBucket extends Component {
                 <td>{this.props.dailyBucket.dailyBucketId.daysInTrendCount}</td>
                 <td>{this.props.dailyBucket.cumulativePercentage}</td>
                 <td>{this.props.dailyBucket.lastStoredQuoteClose}</td>
+                <td>{this.props.dailyBucket.lastStoredQuoteDate}</td>
             </tr>
         )
     }

@@ -10,6 +10,7 @@ class WeeklyBucket extends Component {
                 <td>{this.props.weeklyBucket.weeklyBucketId.weeksInTrendCount}</td>
                 <td>{this.props.weeklyBucket.cumulativePercentage}</td>
                 <td>{this.props.weeklyBucket.lastStoredQuoteClose}</td>
+                <td>{this.props.weeklyBucket.lastStoredQuoteDate}</td>
             </tr>
         )
     }

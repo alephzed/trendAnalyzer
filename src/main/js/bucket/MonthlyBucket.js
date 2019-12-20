@@ -10,6 +10,7 @@ class MonthlyBucket extends React.Component {
                 <td>{this.props.monthlyBucket.monthlyBucketId.monthsInTrendCount}</td>
                 <td>{this.props.monthlyBucket.cumulativePercentage}</td>
                 <td>{this.props.monthlyBucket.lastStoredQuoteClose}</td>
+                <td>{this.props.monthlyBucket.lastStoredQuoteDate}</td>
             </tr>
         )
     }

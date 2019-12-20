@@ -154,14 +154,14 @@ class AllTrends extends Component {
                 </div>
                 <div style={{textAlign:"center"}}>Go Long/ Close Shorts</div>
                 <div className="container">
-                    <div className="fixed"><DailyUpTrend quote={this.state.quote} dailyUp={this.state.dailyUp}/></div>
+                    <div className="flex-item"><DailyUpTrend quote={this.state.quote} dailyUp={this.state.dailyUp}/></div>
                     <div className="flex-item"><WeeklyUpTrend quote={this.state.quote} weeklyUp={this.state.weeklyUp}/></div>
                     <div className="flex-item"><MonthlyUpTrend quote={this.state.quote} monthlyUp={this.state.monthlyUp}/></div>
                 </div>
                 <br/>
                 <div style={{textAlign:"center"}}>Close Longs/ Go Short</div>
                 <div className="container">
-                    <div className="fixed"><DailyDownTrend quote={this.state.quote} dailyDown={this.state.dailyDown}/></div>
+                    <div className="flex-item"><DailyDownTrend quote={this.state.quote} dailyDown={this.state.dailyDown}/></div>
                     <div className="flex-item"><WeeklyDownTrend quote={this.state.quote} weeklyDown={this.state.weeklyDown}/></div>
                     <div className="flex-item"><MonthlyDownTrend quote={this.state.quote} monthlyDown={this.state.monthlyDown}/></div>
                 </div>

@@ -34,7 +34,7 @@ public class DailyQuoteProcessingService implements QuoteLoader {
 
     @Override
     public DailyQuote findLatestQuote(Long tickerId) {
-        return dailyQuoteRepository.findTop1ByTickerIdOrderByIdDesc(tickerId).get(0);
+        return dailyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(tickerId);
     }
 
     @Override
@@ -71,6 +71,9 @@ public class DailyQuoteProcessingService implements QuoteLoader {
     @Override
     public boolean quoteGatingRule(YahooQuoteBean yahooQuote,
                                    QuoteBase lastQuote) {
+        if (lastQuote == null) {
+            return true;
+        }
         boolean differentDate = dateTracker.isDifferentDate(yahooQuote.getDate(), lastQuote.getDate());
         boolean afterLastDate = dateTracker.isAfter(yahooQuote.getDate(), lastQuote.getDate());
         boolean nextTradingDayAfterLastDate = dateTracker.isNextTradingDay(yahooQuote.getDate(), lastQuote.getDate());

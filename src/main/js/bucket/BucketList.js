@@ -25,6 +25,7 @@ class BucketList extends Component {
                         <th>Periods in Trend Count</th>
                         <th>Cumulative Percentage</th>
                         <th>Last Stored Quote</th>
+                        <th>Last Stored Quote Date</th>
                     </tr>
                     {dailyBucket}
                     {weeklyBucket}

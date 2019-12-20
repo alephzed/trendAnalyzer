@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -57,13 +58,11 @@ public class CookieService {
                     = restTemplate.getForEntity(uriComponents.toUri().toString(), String.class);
             String body = response.getBody();
             HttpHeaders headers = response.getHeaders();
-            headers.entrySet().forEach(s -> log.info("Headers: key {} value {}", s.getKey(), s.getValue()));
-//            try {
-                cookie = Objects.requireNonNull(response.getHeaders().get(HttpHeaders.SET_COOKIE)).get(0);
-//            } catch (Exception e) {
-//
-//            }
-            log.info("Retrieved Cookie: {} with body: {}", cookie, body);
+            headers.forEach((key, value) -> log.info("Headers: key {} value " +
+                    "{}", key, value));
+            cookie = Objects.requireNonNull(response.getHeaders().get(HttpHeaders.SET_COOKIE)).get(0);
+            log.info("Retrieved Cookie: {} ", cookie);
+//            log.info("With body: {}", body);
             assert body != null;
             crumb = Arrays.stream(body.split("}")).filter(s -> s.contains("CrumbStore")).map(s -> {
                 String[] vals = s.split(":");
@@ -72,13 +71,14 @@ public class CookieService {
             }).findFirst().map(s -> {
                 log.info(s);
                 try {
-                    byte[] utf8Bytes = s.getBytes("UTF8");
-                    String converted = new String(utf8Bytes, "UTF8");
-                    String replaced = converted.replace("\u002F", "/");
+                    log.info("Crumb before conversion {} with length {}", s, s.length());
+                    byte[] utf8Bytes = s.getBytes(StandardCharsets.UTF_8);
+                    String converted = new String(utf8Bytes, StandardCharsets.UTF_8);
+                    String replaced = converted.replace("\\u002F", "/");
                     log.info("replaced = {}", replaced);
                     return replaced;
                 } catch (Exception e) {
-                    log.info("failed to getBytes");
+                    log.info("failed to getBytes", e);
                 }
                 return s;
             }).orElseThrow(RuntimeException::new);
