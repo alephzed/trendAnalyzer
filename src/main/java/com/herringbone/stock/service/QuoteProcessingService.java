@@ -213,8 +213,7 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
             return list;
         }
         )).forEach(r-> devSquared.addValue(Math.pow(r - logMeanWindowStats.getMean(), 2)));
-        return Math.sqrt(devSquared.getSum()
-                / (logMeanWindowStats.getValues().length - 1));
+        return Math.sqrt(devSquared.getSum() / (logMeanWindowStats.getValues().length - 1));
     }
 
     private Double calculateVolatility(Double logchange, Ticker ticker, Period period) {
