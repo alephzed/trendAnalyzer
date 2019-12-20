@@ -206,10 +206,11 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
         results.stream().filter( r -> r.getLogchange() != null).map( r ->  {
             logMeanWindowStats.addValue(r.getLogchange());
             return r.getLogchange();
-        }).collect(Collectors.collectingAndThen(Collectors.toList(), list -> { if (useCurrentQuote) {
-            list.add(logchange);
-        }
-                    return list;
+        }).collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+            if (useCurrentQuote) {
+                list.add(logchange);
+            }
+            return list;
         }
         )).forEach(r-> devSquared.addValue(Math.pow(r - logMeanWindowStats.getMean(), 2)));
         return Math.sqrt(devSquared.getSum()
