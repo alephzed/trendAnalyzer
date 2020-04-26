@@ -10,9 +10,19 @@ spring:
 
 yahoo:
   index:
-    symbol: GSPC
+    symbol: IXIC
+#    symbol: GSPC
     full:
-      symbol: ^GSPC
+#      symbol: ^GSPC
+      symbol: ^IXIC
+    nasdaq:
+      full:
+        symbol: ^IXIC
+      symbol: IXIC
+    snp:
+      full:
+        symbol: ^GSPC
+      symbol: GSPC
 
 web:
   dailyFile: csv/daily.csv

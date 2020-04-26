@@ -62,11 +62,17 @@ public class HistoricalQuoteLoader {
     @Value("${web.monthlyFile}")
     private String monthlyFile;
 
-    @Value("${yahoo.index.symbol}")
-    private String yahooIndexSymbol;
+    @Value("${yahoo.index.snp.symbol}")
+    private String yahooSnpSymbol;
 
-    @Value("${yahoo.index.full.symbol}")
-    private String yahooIndexFullSymbol;
+    @Value("${yahoo.index.snp.full.symbol}")
+    private String yahooSnpFullSymbol;
+
+    @Value("${yahoo.index.nasdaq.symbol}")
+    private String yahooNasdaqSymbol;
+
+    @Value("${yahoo.index.nasdaq.full.symbol}")
+    private String yahooNasdaqFullSymbol;
 
     private final DailyQuoteRepository dailyQuoteRepository;
     private final WeeklyQuoteRepository weeklyQuoteRepository;
@@ -99,10 +105,13 @@ public class HistoricalQuoteLoader {
     public void processHistoricalQuotes() {
         String[] active = environment.getActiveProfiles();
         if (Arrays.asList(active).contains("test")) {
-            processQuoteFromFile(yahooIndexSymbol);
-            processQuoteFromWeb(yahooIndexFullSymbol);
+            processQuoteFromFile(yahooSnpSymbol);
+            processQuoteFromWeb(yahooSnpFullSymbol);
+            processQuoteFromFile(yahooNasdaqSymbol);
+            processQuoteFromWeb(yahooNasdaqFullSymbol);
         } else {
-            processQuoteFromWeb(yahooIndexFullSymbol);
+            processQuoteFromWeb(yahooSnpFullSymbol);
+            processQuoteFromWeb(yahooNasdaqFullSymbol);
         }
         //TODO only evict the cache if new values have been saved
         stockTrendService.evictAllCacheValues();
@@ -114,20 +123,20 @@ public class HistoricalQuoteLoader {
         DailyQuote dailyQuote = dailyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(ticker.getId());
         ZonedDateTime lastStoredDate = dailyQuote == null ? ticker.getStartdate() : dailyQuote.getDate();
 
-        loadHistoricalDataForPeriod(yahooIndexFullSymbol, lastStoredDate, dateTracker.getEndOfClosestTradingDayCurrent(), Period.Daily);
+        loadHistoricalDataForPeriod(symbol, lastStoredDate, dateTracker.getEndOfClosestTradingDayCurrent(), Period.Daily);
         if (!dateTracker.isMarketOpen(ZonedDateTime.now().withZoneSameInstant(ZoneId.of("America/New_York")))) {
-            YahooQuoteBean quote = yahooQuoteService.getSimpleDailyQuote("^GSPC");
+            YahooQuoteBean quote = yahooQuoteService.getSimpleDailyQuote(symbol);
             quoteProcessingService.processQuote(quote,
                     () -> DailyQuoteMapper.INSTANCE.yahooQuoteToDailyQuote(quote), Period.Daily, Dailytrend.class);
         }
         ZonedDateTime endDate = dateTracker.getEndOfClosestTradingWeekCurrent();
         WeeklyQuote weeklyQuote = weeklyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(ticker.getId());
         lastStoredDate = weeklyQuote == null ? ticker.getStartdate() : weeklyQuote.getDate();
-        loadHistoricalDataForPeriod(yahooIndexFullSymbol, lastStoredDate, endDate, Period.Weekly);
+        loadHistoricalDataForPeriod(symbol, lastStoredDate, endDate, Period.Weekly);
         endDate = dateTracker.getEndOfClosestTradingMonthCurrent();
         MonthlyQuote monthlyQuote = monthlyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(ticker.getId());
         lastStoredDate = monthlyQuote == null ? ticker.getStartdate() : monthlyQuote.getDate();
-        loadHistoricalDataForPeriod(yahooIndexFullSymbol, lastStoredDate, endDate, Period.Monthly);
+        loadHistoricalDataForPeriod(symbol, lastStoredDate, endDate, Period.Monthly);
         //TODO return true if any new quotes were stored
     }
 

@@ -209,67 +209,68 @@ CREATE OR REPLACE VIEW DailyBuckets AS
   ORDER BY t1.tickerid, t1.trendtype, t1.daysintrendcount;
 
 CREATE OR REPLACE VIEW WeeklyBuckets AS
- SELECT t1.total,
-    t1.trendtype,
-    t1.frequency,
-    t1.percentage,
-    t1.weeksintrendcount,
-    sum(t2.percentage) AS cumulativepercentage,
-    sum(t2.frequency) AS cumulativefrequency,
-    t1.tickerid
-   FROM ( SELECT t.total,
-            t.trendtype,
-            s.weeksintrendcount,
-            s.frequency,
-            s.frequency::double precision / t.total::double precision * 100::double precision AS percentage,
-            s.tickerid
-           FROM ( SELECT sum(xx.frequency) AS total,
-                    xx.trendtype,
-                    xx.tickerid
-                   FROM ( SELECT weeklytrend.trendtype,
+SELECT t1.total,
+       t1.trendtype,
+       t1.frequency,
+       t1.percentage,
+       t1.weeksintrendcount,
+       sum(t2.percentage) AS cumulativepercentage,
+       sum(t2.frequency) AS cumulativefrequency,
+       t1.tickerid
+FROM ( SELECT t.total,
+              t.trendtype,
+              s.weeksintrendcount,
+              s.frequency,
+              s.frequency::double precision / t.total::double precision * 100::double precision AS percentage,
+              s.tickerid
+       FROM ( SELECT sum(xx.frequency) AS total,
+                     xx.trendtype,
+                     xx.tickerid
+              FROM ( SELECT weeklytrend.trendtype,
                             weeklytrend.weeksintrendcount,
                             count(*) AS frequency,
                             weeklytrend.tickerid
-                           FROM weeklytrend
-                          GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
-                          ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) xx
-                  GROUP BY xx.tickerid, xx.trendtype) t
-             JOIN ( SELECT weeklytrend.trendtype,
-                    weeklytrend.weeksintrendcount,
-                    count(*) AS frequency,
-                    weeklytrend.tickerid
-                   FROM weeklytrend
-                  GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
-                  ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) s ON s.trendtype = t.trendtype) t1
-     JOIN ( SELECT t.total,
-            t.trendtype,
-            s.weeksintrendcount,
-            s.frequency,
-            s.frequency::double precision / t.total::double precision * 100::double precision AS percentage,
-            s.tickerid
-           FROM ( SELECT sum(yy.frequency) AS total,
-                    yy.trendtype,
-                    yy.tickerid
-                   FROM ( SELECT weeklytrend.trendtype,
-                            weeklytrend.weeksintrendcount,
-                            count(*) AS frequency,
-                            weeklytrend.tickerid
-                           FROM weeklytrend
-                          GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
-                          ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) yy
-                  GROUP BY yy.tickerid, yy.trendtype) t
-             JOIN ( SELECT weeklytrend.trendtype,
-                    weeklytrend.weeksintrendcount,
-                    count(*) AS frequency,
-                    weeklytrend.tickerid
-                   FROM weeklytrend
-                  GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
-                  ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) s ON s.trendtype = t.trendtype) t2 ON t1.weeksintrendcount >= t2.weeksintrendcount AND t1.trendtype = t2.trendtype
-  GROUP BY t1.tickerid, t1.total, t1.trendtype, t1.frequency, t1.percentage, t1.weeksintrendcount
-  ORDER BY t1.tickerid, t1.trendtype, t1.weeksintrendcount;
+                     FROM weeklytrend
+                     GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
+                     ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) xx
+              GROUP BY xx.tickerid, xx.trendtype) t
+                JOIN ( SELECT weeklytrend.trendtype,
+                              weeklytrend.weeksintrendcount,
+                              count(*) AS frequency,
+                              weeklytrend.tickerid
+                       FROM weeklytrend
+                       GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
+                       ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) s ON s.trendtype = t.trendtype and s.tickerid = t.tickerid) t1
+         JOIN ( SELECT t.total,
+                       t.trendtype,
+                       s.weeksintrendcount,
+                       s.frequency,
+                       s.frequency::double precision / t.total::double precision * 100::double precision AS percentage,
+                       s.tickerid
+                FROM ( SELECT sum(yy.frequency) AS total,
+                              yy.trendtype,
+                              yy.tickerid
+                       FROM ( SELECT weeklytrend.trendtype,
+                                     weeklytrend.weeksintrendcount,
+                                     count(*) AS frequency,
+                                     weeklytrend.tickerid
+                              FROM weeklytrend
+                              GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
+                              ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) yy
+                       GROUP BY yy.tickerid, yy.trendtype) t
+                         JOIN ( SELECT weeklytrend.trendtype,
+                                       weeklytrend.weeksintrendcount,
+                                       count(*) AS frequency,
+                                       weeklytrend.tickerid
+                                FROM weeklytrend
+                                GROUP BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount
+                                ORDER BY weeklytrend.tickerid, weeklytrend.trendtype, weeklytrend.weeksintrendcount) s ON s.trendtype = t.trendtype and s.tickerid = t.tickerid) t2 ON t1.weeksintrendcount >= t2.weeksintrendcount AND t1.trendtype = t2.trendtype and t1.tickerid = t2.tickerid
+GROUP BY t1.tickerid, t1.total, t1.trendtype, t1.frequency, t1.percentage, t1.weeksintrendcount
+ORDER BY t1.tickerid, t1.trendtype, t1.weeksintrendcount;
+
 
 CREATE OR REPLACE VIEW MonthlyBuckets AS
- SELECT t1.total,
+SELECT t1.total,
     t1.trendtype,
     t1.frequency,
     t1.percentage,
@@ -300,7 +301,7 @@ CREATE OR REPLACE VIEW MonthlyBuckets AS
                     monthlytrend.tickerid
                    FROM monthlytrend
                   GROUP BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount
-                  ORDER BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount) s ON s.trendtype = t.trendtype) t1
+                  ORDER BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount) s ON s.trendtype = t.trendtype and s.tickerid = t.tickerid) t1
      JOIN ( SELECT t.total,
             t.trendtype,
             s.monthsintrendcount,
@@ -324,6 +325,7 @@ CREATE OR REPLACE VIEW MonthlyBuckets AS
                     monthlytrend.tickerid
                    FROM monthlytrend
                   GROUP BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount
-                  ORDER BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount) s ON s.trendtype = t.trendtype) t2 ON t1.monthsintrendcount >= t2.monthsintrendcount AND t1.trendtype = t2.trendtype
+                  ORDER BY monthlytrend.tickerid, monthlytrend.trendtype, monthlytrend.monthsintrendcount) s ON s.trendtype = t.trendtype and s.tickerid = t.tickerid) t2 ON t1.monthsintrendcount >= t2.monthsintrendcount AND t1.trendtype = t2.trendtype and t1.tickerid = t2.tickerid
   GROUP BY t1.tickerid, t1.total, t1.trendtype, t1.frequency, t1.percentage, t1.monthsintrendcount
   ORDER BY t1.tickerid, t1.trendtype, t1.monthsintrendcount;
+

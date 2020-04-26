@@ -11,12 +11,15 @@ import Quote from "./model/Quote";
 const ReactDOM = require('react-dom');
 const client = require('./client');
 const stompClient = require('./websocket-listener');
-const symbol = 'GSPC';
+// const symbol = 'GSPC';
+// const symbol = 'IXIC';
 
 class AllTrends extends Component {
-    constructor() {
+    constructor(props) {
         super();
         this.state =  {
+            // symbol: props.symbol,
+            symbol: props.match.params.symbol,
             quote: null,
             // lastquote: null,
             dailyUp : null,
@@ -38,29 +41,71 @@ class AllTrends extends Component {
         this.refreshMonthlyDown = this.refreshMonthlyDown.bind(this);
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps.match.params.symbol !== this.props.match.params.symbol) {
+            console.log("DId not match")
+            this.refreshQuote = this.refreshQuote.bind(this);
+            this.refreshTrends = this.refreshTrends.bind(this);
+            this.refreshBuckets = this.refreshBuckets.bind(this);
+            this.refreshDailyUp = this.refreshDailyUp.bind(this);
+            this.refreshWeeklyUp = this.refreshWeeklyUp.bind(this);
+            this.refreshMonthlyUp = this.refreshMonthlyUp.bind(this);
+            this.refreshDailyDown = this.refreshDailyDown.bind(this);
+            this.refreshWeeklyDown = this.refreshWeeklyDown.bind(this);
+            this.refreshMonthlyDown = this.refreshMonthlyDown.bind(this);
+           // this.getPageData();
+            client({method: 'GET', path: '/quote/index/%5E' + this.state.symbol}).done(response => {
+                this.setState({quote: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Daily/Up/1'}).done(response => {
+                this.setState({dailyUp: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Weekly/Up/1'}).done(response => {
+                this.setState({weeklyUp: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Monthly/Up/1'}).done(response => {
+                this.setState({monthlyUp: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Daily/Down/1'}).done(response => {
+                this.setState({dailyDown: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Weekly/Down/1'}).done(response => {
+                this.setState({weeklyDown: response.entity});
+            });
+            client({method: 'GET', path: '/buckets/' + this.state.symbol + ''}).done(response => {
+                this.setState({buckets: response.entity});
+            });
+            client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Monthly/Down/1'}).done(response => {
+                this.setState({monthlyDown: response.entity});
+            });
+        } else {
+            console.log("symbol matched");
+        }
+    }
     componentDidMount() {
-        client({method: 'GET', path: '/quote/index/%5EGSPC'}).done(response => {
+        // client({method: 'GET', path: '/quote/index/%5EGSPC'}).done(response => {
+        client({method: 'GET', path: '/quote/index/%5E' + this.state.symbol}).done(response => {
             this.setState({quote: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Daily/Up/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Daily/Up/1'}).done(response => {
             this.setState({dailyUp: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Weekly/Up/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Weekly/Up/1'}).done(response => {
             this.setState({weeklyUp: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Monthly/Up/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Monthly/Up/1'}).done(response => {
             this.setState({monthlyUp: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Daily/Down/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Daily/Down/1'}).done(response => {
             this.setState({dailyDown: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Weekly/Down/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Weekly/Down/1'}).done(response => {
             this.setState({weeklyDown: response.entity});
         });
-        client({method: 'GET', path: '/buckets/' + symbol + ''}).done(response => {
+        client({method: 'GET', path: '/buckets/' + this.state.symbol + ''}).done(response => {
             this.setState({buckets: response.entity});
         });
-        client({method: 'GET', path: '/quote/trend/' + symbol + '/Monthly/Down/1'}).done(response => {
+        client({method: 'GET', path: '/quote/trend/' + this.state.symbol + '/Monthly/Down/1'}).done(response => {
             this.setState({monthlyDown: response.entity});
         });
         stompClient.register([
@@ -147,7 +192,7 @@ class AllTrends extends Component {
     render() {
         return (
             <div>
-                <h2>The Current Odds Per Period</h2>
+                <h2>The Current Odds Per Period {this.state.symbol}</h2>
                 <div className="container">
                     <div className="quote-fixed"><Buckets buckets={this.state.buckets}/></div>
                     <div className="flex-item"><Quote quote={this.state.quote}/></div>

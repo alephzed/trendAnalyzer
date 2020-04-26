@@ -26,6 +26,8 @@ public class CookieService {
     @Value("${quote.url}")
     private String host;
 
+    private CookieCrumb cookieCrumb;
+
     private final RestTemplate restTemplate;
 
     public CookieService(RestTemplate restTemplate) {
@@ -35,7 +37,13 @@ public class CookieService {
     @Cacheable(value = "cookie", unless = "#result==null or !#result.initialized()")
     public CookieCrumb getCachedCookieCrumb(String actualSymbol) {
         log.info("**************Getting cookie to load into the cache - should only see this when calling to web {}", actualSymbol);
-        return getCookieCrumb(actualSymbol);
+        CookieCrumb cookieCrumb = getCookieCrumb(actualSymbol);
+        if (cookieCrumb.getCookie() != null && cookieCrumb.getCrumb() != null) {
+            this.cookieCrumb = cookieCrumb;
+        } else {
+            return this.cookieCrumb;
+        }
+        return cookieCrumb;
     }
 
     //TODO need to lock this code to only allow one caller in and if another caller tries to

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -34,11 +35,25 @@ public class ScheduledTasks {
 
     public static final int SOCKET_PUBLISH_FIXED_RATE = 300000;
 
-    @Value("${yahoo.index.symbol}")
-    private String yahooIndexSymbol;
+    @Value("${yahoo.index.snp.symbol}")
+    private String yahooSnpSymbol;
 
-    @Value("${yahoo.index.full.symbol}")
-    private String yahooIndexFullSymbol;
+    @Value("${yahoo.index.snp.full.symbol}")
+    private String yahooSnpFullSymbol;
+
+    @Value("${yahoo.index.nasdaq.symbol}")
+    private String yahooNasdaqSymbol;
+
+    @Value("${yahoo.index.nasdaq.full.symbol}")
+    private String yahooNasdaqFullSymbol;
+
+    private List<String> getSymbols() {
+        return Arrays.asList(yahooSnpSymbol, yahooNasdaqSymbol);
+    }
+
+    private List<String> getFullSymbols() {
+        return Arrays.asList(yahooSnpFullSymbol, yahooNasdaqFullSymbol);
+    }
 
     private final SchedulingController schedulingController;
     private final YahooQuoteService yahooQuoteService;
@@ -67,13 +82,15 @@ public class ScheduledTasks {
     @Scheduled(cron = "0 15 14 ? * MON-FRI", zone = "America/Denver")
     public void loadDailyQuote() {
         log.info("Processing dailyquote");
-        schedulingController.dailyQuoteJob(yahooIndexSymbol);
+        schedulingController.dailyQuoteJob(yahooSnpSymbol);
+        schedulingController.dailyQuoteJob(yahooNasdaqSymbol);
     }
 
     @Scheduled(cron = "0 30 14 ? * FRI", zone = "America/Denver")
     public void loadWeeklyQuote() {
         log.info("Processing weeklyquote");
-        schedulingController.weeklyQuoteJob(yahooIndexSymbol);
+        schedulingController.weeklyQuoteJob(yahooSnpSymbol);
+        schedulingController.weeklyQuoteJob(yahooNasdaqSymbol);
         log.info("Processing weeklyquote done");
     }
 
@@ -89,33 +106,36 @@ public class ScheduledTasks {
                 dateTime.with(TemporalAdjusters.lastDayOfMonth());
         if (dateTime.equals(endOfMonth)) {
             log.info("Processing monthlyquote");
-            schedulingController.monthlyQuoteJob(yahooIndexSymbol);
+            schedulingController.monthlyQuoteJob(yahooSnpSymbol);
+            schedulingController.monthlyQuoteJob(yahooNasdaqSymbol);
         }
     }
 
     @Scheduled(fixedRate = 86400000, initialDelay = 86400000)
     public void reloadCookie() {
-        log.info("trying to Reload cookie");
-        CookieCrumb cookieCrumb =
-                cookieService.getCookieCrumb(yahooIndexFullSymbol);
-        log.info("Retrieved cookiecrumb {} {}", cookieCrumb.getCookie(),
-                cookieCrumb.getCrumb());
+        for (String symbol : getFullSymbols()) {
+            log.info("trying to Reload cookie");
+            CookieCrumb cookieCrumb =
+                    cookieService.getCookieCrumb(symbol);
+            log.info("Retrieved cookiecrumb {} {}", cookieCrumb.getCookie(),
+                    cookieCrumb.getCrumb());
+        }
     }
 
     @Scheduled(fixedRate = 30000, initialDelay = 60000)
     public void getCurrentQuote() {
         log.info("Processing current quote");
+        for (String symbol : getFullSymbols()) {
+            YahooQuoteBean quote =
+                    yahooQuoteService.getSimpleDailyQuote(symbol);
+            //If we can't retrieve a quote, then no need to generate a websocket
+            // event
+            if (quote != null && quote.getLast() != null && quote.getLast() > 0) {
 
-        YahooQuoteBean quote =
-                yahooQuoteService.getSimpleDailyQuote(yahooIndexFullSymbol);
-        //If we can't retrieve a quote, then no need to generate a websocket
-        // event
-        if (quote != null && quote.getLast() != null && quote.getLast() > 0) {
-
-            //TODO figure out what to do with the matched ranges, currently
-            // the UI is not using this topic
-            // take the quote and check which bucket if falls into for the
-            // trends
+                //TODO figure out what to do with the matched ranges, currently
+                // the UI is not using this topic
+                // take the quote and check which bucket if falls into for the
+                // trends
 //            Trend dailyUpTrend = trendService.getLatestTrend
 //            (yahooIndexSymbol, "Up", Period.Daily, 1);
 //            Trend dailyDownTrend = trendService.getLatestTrend
@@ -146,12 +166,13 @@ public class ScheduledTasks {
 //            lastQuote);
 //            matchedRanges.put("monthlyDown", monthlyDown);
 
-            this.websocket.convertAndSend(
-                    MESSAGE_PREFIX + "/lastfullquote", quote);
+                this.websocket.convertAndSend(
+                        MESSAGE_PREFIX + "/lastfullquote/" + symbol, quote);
 //            this.websocket.convertAndSend(
 //                    MESSAGE_PREFIX + "/trends", matchedRanges);
-        } else {
-            log.info("Quote was not retrieved. Not sending websocket event.");
+            } else {
+                log.info("Quote was not retrieved. Not sending websocket event.");
+            }
         }
     }
 
@@ -163,92 +184,106 @@ public class ScheduledTasks {
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getQuoteBuckets() {
-        try {
-            Map buckets = bucketService.getCurrentBuckets(yahooIndexSymbol);
-            this.websocket.convertAndSend(
-                    MESSAGE_PREFIX + "/quotebuckets", buckets);
-        } catch (Exception e) {
-            log.info("Error with current buckets",e);
+        for (String symbol : getSymbols()) {
+            try {
+                Map buckets = bucketService.getCurrentBuckets(symbol);
+                this.websocket.convertAndSend(
+                        MESSAGE_PREFIX + "/quotebuckets/" + symbol, buckets);
+            } catch (Exception e) {
+                log.info("Error with current buckets", e);
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getDailyUpTrend() {
-        try {
-            Trend dailyUpTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                    "Up", Period.Daily, 1);
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/dailyUp",
-                    dailyUpTrend);
-        } catch(Exception e) {
-            log.info("Unable to get dailyuptrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                Trend dailyUpTrend = trendService.getLatestTrend(symbol,
+                        "Up", Period.Daily, 1);
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/dailyUp/" + symbol,
+                        dailyUpTrend);
+            } catch (Exception e) {
+                log.info("Unable to get dailyuptrend", e);
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getWeeklyUpTrend() {
-        try {
-            Trend weeklyUpTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                    "Up", Period.Weekly, 1);
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/weeklyUp",
-                    weeklyUpTrend);
-        } catch (Exception e) {
-            log.info("Unable to get weeklyuptrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                Trend weeklyUpTrend = trendService.getLatestTrend(symbol,
+                        "Up", Period.Weekly, 1);
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/weeklyUp/" + symbol,
+                        weeklyUpTrend);
+            } catch (Exception e) {
+                log.info("Unable to get weeklyuptrend", e);
 
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getMonthlyUpTrend() {
-        try {
-            int precision = 1;
-            Trend monthlyUpTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                    "Up", Period.Monthly, precision);
-            while (monthlyUpTrend.getRanges().size() == 1) {
-                monthlyUpTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                        "Up", Period.Monthly, precision++);
-            }
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/monthlyUp",
-                    monthlyUpTrend);
-        } catch (Exception e) {
-            log.info("Unable to get monthlyuptrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                int precision = 1;
+                Trend monthlyUpTrend = trendService.getLatestTrend(symbol,
+                        "Up", Period.Monthly, precision);
+                while (monthlyUpTrend.getRanges().size() == 1) {
+                    monthlyUpTrend = trendService.getLatestTrend(symbol,
+                            "Up", Period.Monthly, precision++);
+                }
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/monthlyUp/" + symbol,
+                        monthlyUpTrend);
+            } catch (Exception e) {
+                log.info("Unable to get monthlyuptrend", e);
 
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getDailyDownTrend() {
-        try {
-            Trend dailyDownTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                    "Down", Period.Daily, 1);
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/dailyDown",
-                    dailyDownTrend);
-        } catch (Exception e) {
-            log.info("Unable to get dailyDownTrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                Trend dailyDownTrend = trendService.getLatestTrend(symbol,
+                        "Down", Period.Daily, 1);
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/dailyDown/" + symbol,
+                        dailyDownTrend);
+            } catch (Exception e) {
+                log.info("Unable to get dailyDownTrend", e);
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getWeeklyDownTrend() {
-        try {
-            Trend weeklyDownTrend = trendService.getLatestTrend(yahooIndexSymbol,
-                    "Down", Period.Weekly, 1);
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/weeklyDown",
-                    weeklyDownTrend);
-        } catch (Exception e) {
-            log.info("Unable to get weeklyDownTrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                Trend weeklyDownTrend = trendService.getLatestTrend(symbol,
+                        "Down", Period.Weekly, 1);
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/weeklyDown/" + symbol,
+                        weeklyDownTrend);
+            } catch (Exception e) {
+                log.info("Unable to get weeklyDownTrend", e);
+            }
         }
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getMonthlyDownTrend() {
-        try {
-            Trend monthlyDownTrend = trendService.getLatestTrend(yahooIndexSymbol
-                    , "Down", Period.Monthly, 1);
-            this.websocket.convertAndSend(MESSAGE_PREFIX + "/monthlyDown",
-                    monthlyDownTrend);
-        } catch (Exception e) {
-            log.info("Unable to get monthlyDownTrend", e);
+        for (String symbol : getSymbols()) {
+            try {
+                Trend monthlyDownTrend = trendService.getLatestTrend(symbol
+                        , "Down", Period.Monthly, 1);
+                this.websocket.convertAndSend(MESSAGE_PREFIX + "/monthlyDown/" + symbol,
+                        monthlyDownTrend);
+            } catch (Exception e) {
+                log.info("Unable to get monthlyDownTrend", e);
 
+            }
         }
     }
 

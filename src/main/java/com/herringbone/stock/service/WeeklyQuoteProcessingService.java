@@ -80,7 +80,8 @@ public class WeeklyQuoteProcessingService implements QuoteLoader {
         ZonedDateTime lastSavedDate = lastQuote.getDate();
         boolean differentDate = dateTracker.isDifferentDate(dateToSave, lastQuote.getDate());
         boolean isAfter = dateTracker.isAfter(dateToSave, lastQuote.getDate());
-        boolean isMonday = dateToSave.getDayOfWeek().equals(DayOfWeek.SUNDAY);
+        boolean isMonday = dateToSave.getDayOfWeek().equals(DayOfWeek.MONDAY);
+//        boolean isMonday = dateToSave.getDayOfWeek().equals(DayOfWeek.SUNDAY);
         boolean notInCurrentWeek = !dateTracker.inCurrentWeek(dateToSave);
         log.info("Proposing to save {} as the next date after {}", dateToSave, lastQuote.getDate());
         if (!differentDate) {

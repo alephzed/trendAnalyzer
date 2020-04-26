@@ -16,3 +16,24 @@ spring:
     driver-class-name: org.postgresql.Driver
 #    schema: classpath*:schema-h2.sql
 #    data: classpath*:data-h2.sql
+yahoo:
+  index:
+    symbol: IXIC
+    #    symbol: GSPC
+    full:
+      #      symbol: ^GSPC
+      symbol: ^IXIC
+    nasdaq:
+      full:
+        symbol: ^IXIC
+      symbol: IXIC
+    snp:
+      full:
+        symbol: ^GSPC
+      symbol: GSPC
+
+quote:
+  scheme: https
+  url: finance.yahoo.com
+  historic:
+    url: query1.finance.yahoo.com
