@@ -3,8 +3,6 @@ package com.herringbone.stock.repository;
 import com.herringbone.stock.domain.Trend;
 import com.herringbone.stock.model.Dailytrend;
 import com.herringbone.stock.model.HistoricalTrendElement;
-import com.herringbone.stock.model.Trendtype;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,11 +36,7 @@ public interface DailyTrendRepository extends JpaRepository<Dailytrend,Long> {
             "and gt3.id != :id " +
             "and gt1.ticker.id = :tickerId ";
 
-    List<Dailytrend> findByTickerId(Long tickerId);
-    List<Dailytrend> findTop2ByTickerIdOrderByIdDesc(Long tickerId);
     Dailytrend findTop1ByTickerIdOrderByIdDesc(Long tickerId);
-    Dailytrend findTop1ByTickerIdAndTrendtypeOrderByIdDesc(Long tickerId,
-                                                           Trendtype trendtype);
 
     @Query("Select new com.herringbone.stock.domain.Trend(gt1.id, g1end.close, g1start.close, gt2.trendstart.close, g1end.id," +
             "gt2.trendstart.id, g1start.id, g1end.date, gt1.daysintrendcount, gt1.trendpointchange, gt1.trendpercentagechange) " +
@@ -52,12 +46,6 @@ public interface DailyTrendRepository extends JpaRepository<Dailytrend,Long> {
             "where gt1.trendtype.id = :trendId and gt1.ticker.id = :tickerId " +
             "order by gt1.id desc")
     List<Trend> findMatchingTrend(@Param("trendId") Long id, @Param("tickerId") Long tickerId);
-
-    @Query("Select gt1 from Dailytrend gt1 join fetch gt1.previoustrend gt2 left join fetch gt1.nexttrend gt3 " +
-            "left join fetch  gt1.trendstart g1start " + //left join fetch gt1.trendend g1end "+
-            "where gt1.trendtype.id = :trendId and gt1.ticker.id = :tickerId " +
-            "order by gt1.id desc")
-    List<Dailytrend> findTheTrend(Pageable page, @Param("trendId") Long id, @Param("tickerId") Long tickerId);
 
     @Query( name = "similarDailyTrends", value = "Select new com.herringbone.stock.model.HistoricalTrendElement(gt1.id, g2.close, g1.close, g3.close, g4.close, " +
             "g5.close, gt1.nexttrend.id, gt3.trendend.id, abs((g5.close - g4.close) / g4.close), (g2.close / g1.close), " +

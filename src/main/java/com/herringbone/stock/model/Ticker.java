@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +20,8 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name="ticker")
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

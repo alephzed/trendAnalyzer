@@ -2,7 +2,6 @@ package com.herringbone.stock.repository;
 
 import com.herringbone.stock.domain.Trend;
 import com.herringbone.stock.model.HistoricalTrendElement;
-import com.herringbone.stock.model.Trendtype;
 import com.herringbone.stock.model.Weeklytrend;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,10 +36,7 @@ public interface WeeklyTrendRepository extends JpaRepository<Weeklytrend,Long> {
             "and gt3.id != :id " +
             "and gt1.ticker.id = :tickerId ";
 
-    List<Weeklytrend> findByTickerId(Long tickerId);
-    List<Weeklytrend> findTop2ByTickerIdOrderByIdDesc(Long tickerId);
     Weeklytrend findTop1ByTickerIdOrderByIdDesc(Long tickerId);
-    List<Weeklytrend> findTop1ByTickerIdAndTrendtypeOrderByIdDesc(Long tickerId, Trendtype trendtype);
 
     @Query("Select new com.herringbone.stock.domain.Trend(gt1.id, g1end.close, g1start.close, gt2.trendstart.close, g1end.id," +
             "gt2.trendstart.id, g1start.id, g1end.date, gt1.weeksintrendcount, gt1.trendpointchange, gt1.trendpercentagechange)" +

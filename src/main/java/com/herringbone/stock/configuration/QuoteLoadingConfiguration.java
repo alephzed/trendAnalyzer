@@ -1,7 +1,6 @@
 package com.herringbone.stock.configuration;
 
 import com.herringbone.stock.service.QuoteLoadingFactory;
-import com.herringbone.stock.service.QuoteProcessingFactory;
 import com.herringbone.stock.service.StockFindServiceFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ServiceLocatorFactoryBean;
@@ -23,13 +22,6 @@ public class QuoteLoadingConfiguration {
     public FactoryBean stockFindServiceLocatory() {
         ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
         factoryBean.setServiceLocatorInterface(StockFindServiceFactory.class);
-        return factoryBean;
-    }
-
-    @Bean("quoteProcessingFactory")
-    public FactoryBean quoteProcessingFactory() {
-        ServiceLocatorFactoryBean factoryBean = new ServiceLocatorFactoryBean();
-        factoryBean.setServiceLocatorInterface(QuoteProcessingFactory.class);
         return factoryBean;
     }
 

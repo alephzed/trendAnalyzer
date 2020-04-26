@@ -4,23 +4,26 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomDateTimeSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 @Entity
 @Table(name="weeklybuckets")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WeeklyBucket {
+public class WeeklyBucket implements Serializable {
     @EmbeddedId
     @JsonSerialize
     WeeklyBucketId weeklyBucketId;

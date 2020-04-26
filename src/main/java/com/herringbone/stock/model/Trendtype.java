@@ -4,8 +4,11 @@ package com.herringbone.stock.model;
 // Generated Jan 8, 2014 8:09:55 PM by Hibernate Tools 3.4.0.CR1
 
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,7 +21,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="trendtype")
 @Builder
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Trendtype  implements java.io.Serializable {
 
     @Id
@@ -32,17 +38,7 @@ public class Trendtype  implements java.io.Serializable {
     @Column(name="TRENDVALUE", unique=true, nullable=false)
     private long trendvalue;
 
-    public Trendtype() {
-    }
-
-	
     public Trendtype(long trendvalue) {
-        this.trendvalue = trendvalue;
-    }
-
-    public Trendtype(long id, String description, long trendvalue) {
-       this.id = id;
-       this.description = description;
         this.trendvalue = trendvalue;
     }
 
