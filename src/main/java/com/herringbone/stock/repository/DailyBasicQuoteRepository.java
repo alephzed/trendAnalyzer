@@ -9,12 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository("dailyBasicQuote")
 public interface DailyBasicQuoteRepository extends JpaRepository<DailyBasicQuote,Long> {
 
-    DailyBasicQuote findTop1ByTickerIdOrderByIdDesc(Long tickerId);
-
     @Query("SELECT g FROM DailyBasicQuote g WHERE g.id = (:id)")
     DailyBasicQuote findOne(@Param("id") Long id);
-
-    @Query("select avg(g.volatility) from DailyBasicQuote g where g.id > (select max(gt.trendstart.id) -1  from Dailytrend gt)")
-    Double getLatestVolatility();
-
 }

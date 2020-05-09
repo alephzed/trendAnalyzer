@@ -12,7 +12,4 @@ public interface MonthlyBasicQuoteRepository extends JpaRepository<MonthlyBasicQ
     @Query("SELECT g FROM MonthlyBasicQuote g WHERE g.id = (:id)")
     MonthlyBasicQuote findOne(@Param("id") Long id);
 
-    @Query("select avg(g.volatility) from MonthlyBasicQuote g where g.id > (select max(gt.trendstart.id) -1  from Monthlytrend gt)")
-    Double getLatestVolatility();
-
 }

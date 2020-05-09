@@ -135,8 +135,10 @@ public class StockTrendService {
 
                         Double percentChange = trendCalculationStrategy.getImpulsMoveStats(dt);
                         if (percentChange < 0) {
-                            log.info("Why is this less than 0? This should NEVER happen");
-                            log.info("Cannot insert trend with id: " + dt.getTrendId() );
+                            log.info("*********************************************************************************************************");
+                            log.info("******************************Why is this less than 0? TODO - add more debugging This should NEVER happen**************************");
+                            log.info("Cannot add trend to trendbucket {} with id: {}", trendBucket.toString(), dt.getTrendId() );
+                            log.info("*********************************************************************************************************");
                         } else {
                             trendBucket.insertRecord(percentChange, dt);
                         }

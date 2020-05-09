@@ -6,9 +6,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.herringbone.stock.domain.YahooQuoteBean;
 import com.herringbone.stock.mapper.DailyQuoteMapper;
-import com.herringbone.stock.model.DailyBasicQuote;
+import com.herringbone.stock.model.IBasicQuote;
 import com.herringbone.stock.model.Ticker;
-import com.herringbone.stock.repository.DailyBasicQuoteRepository;
+import com.herringbone.stock.repository.DailyQuoteRepository;
 import com.herringbone.stock.util.CookieCrumb;
 import com.herringbone.stock.util.Period;
 import com.herringbone.stock.util.ZonedDateTracker;
@@ -43,7 +43,7 @@ public class YahooQuoteService {
     private final TickerService tickerService;
     private final CookieService cookieService;
     private final ZonedDateTracker zonedDateTracker;
-    private final DailyBasicQuoteRepository dailyBasicQuoteRepository;
+    private final DailyQuoteRepository dailyQuoteRepository;
 
     @Value("${quote.scheme}")
     private String scheme;
@@ -54,12 +54,12 @@ public class YahooQuoteService {
     @Value("${quote.historic.url}")
     private String historicUrl;
 
-    public YahooQuoteService(@Qualifier("yahooRestTemplate") RestTemplate restTemplate, TickerService tickerService, CookieService cookieService, ZonedDateTracker zonedDateTracker, DailyBasicQuoteRepository dailyBasicQuoteRepository) {
+    public YahooQuoteService(@Qualifier("yahooRestTemplate") RestTemplate restTemplate, TickerService tickerService, CookieService cookieService, ZonedDateTracker zonedDateTracker, DailyQuoteRepository dailyQuoteRepository) {
         this.restTemplate = restTemplate;
         this.tickerService = tickerService;
         this.cookieService = cookieService;
         this.zonedDateTracker = zonedDateTracker;
-        this.dailyBasicQuoteRepository = dailyBasicQuoteRepository;
+        this.dailyQuoteRepository = dailyQuoteRepository;
     }
 
     public YahooQuoteBean getSimpleDailyQuote(String symbol) {
@@ -81,8 +81,8 @@ public class YahooQuoteService {
 
     private YahooQuoteBean getLastStoredQuote(String symbol) {
         Ticker ticker = tickerService.getTicker(symbol);
-        DailyBasicQuote dailyBasicQuote =
-                dailyBasicQuoteRepository.findTop1ByTickerIdOrderByIdDesc(ticker.getId());
+        IBasicQuote dailyBasicQuote =
+                dailyQuoteRepository.findTop1ByTickerIdOrderByIdDesc(ticker.getId());
         return DailyQuoteMapper.INSTANCE.dailyBasicQuoteToYahooQuote(dailyBasicQuote);
     }
 

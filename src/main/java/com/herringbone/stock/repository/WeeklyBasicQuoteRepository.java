@@ -11,8 +11,4 @@ public interface WeeklyBasicQuoteRepository extends JpaRepository<WeeklyBasicQuo
 
     @Query("SELECT g FROM WeeklyBasicQuote g WHERE g.id = (:id)")
     WeeklyBasicQuote findOne(@Param("id") Long id);
-
-    @Query("select avg(g.volatility) from WeeklyBasicQuote g where g.id > (select max(gt.trendstart.id) -1  from Weeklytrend gt)")
-    Double getLatestVolatility();
-
 }

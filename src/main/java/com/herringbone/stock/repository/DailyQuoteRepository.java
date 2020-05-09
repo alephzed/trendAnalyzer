@@ -1,6 +1,7 @@
 package com.herringbone.stock.repository;
 
 import com.herringbone.stock.model.DailyQuote;
+import com.herringbone.stock.model.IBasicQuote;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,8 @@ public interface DailyQuoteRepository extends JpaRepository<DailyQuote,Long> {
     Double getLatestVolatility();
 
     DailyQuote findFirstOneByTickerIdOrderByIdDesc(@Param("tickerId") Long tickerId);
+
+    //To support last quote
+//    DailyBasicQuote findTop1ByTickerIdOrderByIdDesc(Long tickerId);
+    IBasicQuote findTop1ByTickerIdOrderByIdDesc(Long tickerId);
 }
