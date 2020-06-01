@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomQuoteSerializer;
 import com.herringbone.stock.util.CustomTrendSerializer;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
@@ -19,8 +18,8 @@ import javax.persistence.Table;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
 public class DailyQuote extends QuoteBase<DailyBasicQuote> implements java.io.Serializable {
 
-    @OneToOne(cascade= CascadeType.ALL,fetch = FetchType.EAGER)
-    @JoinColumn(name = "PREVDAY")
+    @OneToOne
+    @JoinColumn(name = "PREVDAY", unique = true)
     @JsonSerialize(using = CustomQuoteSerializer.class)
     private DailyBasicQuote prevday;
 
@@ -29,7 +28,7 @@ public class DailyQuote extends QuoteBase<DailyBasicQuote> implements java.io.Se
     @JsonSerialize(using = CustomQuoteSerializer.class)
     private DailyBasicQuote nextday;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "DAYTYPE", foreignKey = @ForeignKey(name = "DAYTYPE_FK"), referencedColumnName = "TRENDVALUE")
     @JsonSerialize(using = CustomTrendSerializer.class)
     private Trendtype daytype;

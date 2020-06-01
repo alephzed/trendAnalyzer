@@ -2,12 +2,13 @@ package com.herringbone.stock.service;
 
 import com.herringbone.stock.domain.Trend;
 import com.herringbone.stock.domain.YahooQuoteBean;
+import com.herringbone.stock.model.DailyBasicQuote;
 import com.herringbone.stock.model.DailyQuote;
 import com.herringbone.stock.model.Dailytrend;
+import com.herringbone.stock.model.IBasicQuote;
 import com.herringbone.stock.model.PeriodTrend;
 import com.herringbone.stock.model.QuoteBase;
 import com.herringbone.stock.model.Ticker;
-import com.herringbone.stock.repository.DailyBasicQuoteRepository;
 import com.herringbone.stock.repository.DailyQuoteRepository;
 import com.herringbone.stock.repository.DailyTrendRepository;
 import com.herringbone.stock.util.ZonedDateTracker;
@@ -21,20 +22,24 @@ import java.util.List;
 @Slf4j
 public class DailyQuoteProcessingService implements QuoteLoader {
     private final DailyQuoteRepository dailyQuoteRepository;
-    private final DailyBasicQuoteRepository dailyBasicQuoteRepository;
     private final DailyTrendRepository dailyTrendRepository;
     private final ZonedDateTracker dateTracker;
 
-    public DailyQuoteProcessingService(DailyQuoteRepository dailyQuoteRepository, DailyBasicQuoteRepository dailyBasicQuoteRepository, DailyTrendRepository dailyTrendRepository, ZonedDateTracker dateTracker) {
+    public DailyQuoteProcessingService(DailyQuoteRepository dailyQuoteRepository, DailyTrendRepository dailyTrendRepository, ZonedDateTracker dateTracker) {
         this.dailyQuoteRepository = dailyQuoteRepository;
-        this.dailyBasicQuoteRepository = dailyBasicQuoteRepository;
         this.dailyTrendRepository = dailyTrendRepository;
         this.dateTracker = dateTracker;
     }
 
     @Override
     public DailyQuote findLatestQuote(Long tickerId) {
-        return dailyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(tickerId);
+        log.info("In findLatestQuote: Before findFirstOneByTickerIdOrderByIdDesc");
+        DailyQuote dq = dailyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(tickerId);
+        log.info("In findLatestQuote: After findFirstOneByTickerIdOrderByIdDesc");
+        log.info("In findLatestQuote: Before findTop1ByTickerIdOrderByIdDesc");
+        IBasicQuote bdq = dailyQuoteRepository.findTop1ByTickerIdOrderByIdDesc(tickerId);
+        log.info("In findLatestQuote: After findTop1ByTickerIdOrderByIdDesc");
+        return dq;
     }
 
     @Override
@@ -49,7 +54,10 @@ public class DailyQuoteProcessingService implements QuoteLoader {
 
     @Override
     public QuoteBase findBasicQuote(Long id) {
-        return dailyBasicQuoteRepository.findOne(id);
+        log.info("Before findOne Daily");
+        DailyBasicQuote dq = dailyQuoteRepository.findOne(id);
+        log.info("After findOne Daily");
+        return dq;
     }
 
     @Override

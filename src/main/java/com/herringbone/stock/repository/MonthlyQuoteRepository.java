@@ -1,5 +1,6 @@
 package com.herringbone.stock.repository;
 
+import com.herringbone.stock.model.MonthlyBasicQuote;
 import com.herringbone.stock.model.MonthlyQuote;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +20,7 @@ public interface MonthlyQuoteRepository extends JpaRepository<MonthlyQuote,Long>
     Double getLatestVolatility();
 
     MonthlyQuote findFirstOneByTickerIdOrderByIdDesc(@Param("tickerId") Long tickerId);
+
+    @Query("SELECT g FROM MonthlyBasicQuote g WHERE g.id = (:id)")
+    MonthlyBasicQuote findOne(@Param("id") Long id);
 }

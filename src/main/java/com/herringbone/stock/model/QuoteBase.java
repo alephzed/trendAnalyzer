@@ -63,7 +63,7 @@ public class QuoteBase<T> implements Serializable{
     @JsonProperty
     private Double adjclose;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "TRENDTYPE") //, referencedColumnName = "TRENDVALUE")
     @JsonSerialize(using = CustomTrendSerializer.class)
     private Trendtype trendtype;
@@ -84,7 +84,7 @@ public class QuoteBase<T> implements Serializable{
     @JsonProperty
     private Double spike;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="TICKERID")
     @JsonProperty
     private Ticker ticker;

@@ -7,7 +7,6 @@ import com.herringbone.stock.model.Monthlytrend;
 import com.herringbone.stock.model.PeriodTrend;
 import com.herringbone.stock.model.QuoteBase;
 import com.herringbone.stock.model.Ticker;
-import com.herringbone.stock.repository.MonthlyBasicQuoteRepository;
 import com.herringbone.stock.repository.MonthlyQuoteRepository;
 import com.herringbone.stock.repository.MonthlyTrendRepository;
 import com.herringbone.stock.util.ZonedDateTracker;
@@ -21,13 +20,11 @@ import java.util.List;
 @Service("Monthly")
 public class MonthlyQuoteProcessingService implements QuoteLoader {
     private final MonthlyQuoteRepository monthlyQuoteRepository;
-    private final MonthlyBasicQuoteRepository monthlyBasicQuoteRepository;
     private final MonthlyTrendRepository monthlyTrendRepository;
     private final ZonedDateTracker dateTracker;
 
-    public MonthlyQuoteProcessingService(MonthlyQuoteRepository monthlyQuoteRepository, MonthlyBasicQuoteRepository monthlyBasicQuoteRepository, MonthlyTrendRepository monthlyTrendRepository, ZonedDateTracker dateTracker) {
+    public MonthlyQuoteProcessingService(MonthlyQuoteRepository monthlyQuoteRepository, MonthlyTrendRepository monthlyTrendRepository, ZonedDateTracker dateTracker) {
         this.monthlyQuoteRepository = monthlyQuoteRepository;
-        this.monthlyBasicQuoteRepository = monthlyBasicQuoteRepository;
         this.monthlyTrendRepository = monthlyTrendRepository;
         this.dateTracker = dateTracker;
     }
@@ -49,7 +46,7 @@ public class MonthlyQuoteProcessingService implements QuoteLoader {
 
     @Override
     public QuoteBase findBasicQuote(Long id) {
-        return monthlyBasicQuoteRepository.findOne(id);
+        return monthlyQuoteRepository.findOne(id);
     }
 
     @Override

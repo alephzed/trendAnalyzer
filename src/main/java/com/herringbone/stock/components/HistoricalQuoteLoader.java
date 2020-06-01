@@ -119,6 +119,7 @@ public class HistoricalQuoteLoader {
 
     //TODO - some weirdness happening when saving historical quotes vs quotes not from historical quotes
     private void processQuoteFromWeb(String symbol) {
+        //TODO from these queries = we only need, ticker.startdate, tickerId, and dailyQuote.startdate
         Ticker ticker = tickerService.getTicker(symbol);
         DailyQuote dailyQuote = dailyQuoteRepository.findFirstOneByTickerIdOrderByIdDesc(ticker.getId());
         ZonedDateTime lastStoredDate = dailyQuote == null ? ticker.getStartdate() : dailyQuote.getDate();

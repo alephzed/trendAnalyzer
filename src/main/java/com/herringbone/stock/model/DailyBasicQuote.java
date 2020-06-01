@@ -17,7 +17,7 @@ import javax.persistence.Table;
 // A non-recursive representation of the DailyQuote entity
 public class DailyBasicQuote extends QuoteBase implements java.io.Serializable {
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "DAYTYPE", referencedColumnName = "TRENDVALUE")
     @Fetch(FetchMode.JOIN)
     private Trendtype daytype;

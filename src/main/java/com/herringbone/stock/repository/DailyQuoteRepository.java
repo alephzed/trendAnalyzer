@@ -1,10 +1,12 @@
 package com.herringbone.stock.repository;
 
+import com.herringbone.stock.model.DailyBasicQuote;
 import com.herringbone.stock.model.DailyQuote;
 import com.herringbone.stock.model.IBasicQuote;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -18,9 +20,6 @@ public interface DailyQuoteRepository extends JpaRepository<DailyQuote,Long> {
 
     List<DailyQuote> findByTickerIdAndId(Long tickerId, Long id, Pageable page);
 
-    @Query("SELECT g FROM DailyQuote g WHERE g.id = (:id)")
-    DailyQuote findOne(@Param("id") Long id);
-
     @Query("SELECT g FROM DailyQuote g JOIN FETCH g.nextday JOIN FETCH g.prevday ORDER BY g.id desc")
     List<DailyQuote> findLastEager(Pageable page);
 
@@ -32,4 +31,8 @@ public interface DailyQuoteRepository extends JpaRepository<DailyQuote,Long> {
     //To support last quote
 //    DailyBasicQuote findTop1ByTickerIdOrderByIdDesc(Long tickerId);
     IBasicQuote findTop1ByTickerIdOrderByIdDesc(Long tickerId);
+
+    @Query("SELECT g FROM DailyBasicQuote g WHERE g.id = (:id)")
+    @QueryHints(@javax.persistence.QueryHint(name = "org.hibernate.comment", value = "Comment test"))
+    DailyBasicQuote findOne(@Param("id") Long id);
 }

@@ -7,7 +7,6 @@ import com.herringbone.stock.model.QuoteBase;
 import com.herringbone.stock.model.Ticker;
 import com.herringbone.stock.model.WeeklyQuote;
 import com.herringbone.stock.model.Weeklytrend;
-import com.herringbone.stock.repository.WeeklyBasicQuoteRepository;
 import com.herringbone.stock.repository.WeeklyQuoteRepository;
 import com.herringbone.stock.repository.WeeklyTrendRepository;
 import com.herringbone.stock.util.ZonedDateTracker;
@@ -23,13 +22,11 @@ import java.util.List;
 @Slf4j
 public class WeeklyQuoteProcessingService implements QuoteLoader {
     private final WeeklyQuoteRepository weeklyQuoteRepository;
-    private final WeeklyBasicQuoteRepository weeklyBasicQuoteRepository;
     private final WeeklyTrendRepository weeklyTrendRepository;
     private final ZonedDateTracker dateTracker;
 
-    public WeeklyQuoteProcessingService(WeeklyQuoteRepository weeklyQuoteRepository, WeeklyBasicQuoteRepository weeklyBasicQuoteRepository, WeeklyTrendRepository weeklyTrendRepository, ZonedDateTracker dateTracker) {
+    public WeeklyQuoteProcessingService(WeeklyQuoteRepository weeklyQuoteRepository, WeeklyTrendRepository weeklyTrendRepository, ZonedDateTracker dateTracker) {
         this.weeklyQuoteRepository = weeklyQuoteRepository;
-        this.weeklyBasicQuoteRepository = weeklyBasicQuoteRepository;
         this.weeklyTrendRepository = weeklyTrendRepository;
         this.dateTracker = dateTracker;
     }
@@ -51,7 +48,7 @@ public class WeeklyQuoteProcessingService implements QuoteLoader {
 
     @Override
     public QuoteBase findBasicQuote(Long id) {
-        return weeklyBasicQuoteRepository.findOne(id);
+        return weeklyQuoteRepository.findOne(id);
     }
 
     @Override
