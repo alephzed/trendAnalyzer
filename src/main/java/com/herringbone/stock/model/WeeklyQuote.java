@@ -3,6 +3,11 @@ package com.herringbone.stock.model;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomQuoteSerializer;
 import com.herringbone.stock.util.CustomTrendSerializer;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.LazyToOne;
 import org.hibernate.annotations.LazyToOneOption;
 
@@ -17,7 +22,24 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "weeklyquote")
-public class WeeklyQuote extends QuoteBase implements java.io.Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@SuperBuilder
+public class WeeklyQuote extends QuoteBase<WeeklyBasicQuote> implements java.io.Serializable {
+
+//    @Builder
+//    public WeeklyQuote(Long id, ZonedDateTime date, Double open, Double high, Double low, Double close,
+//                      Long volume, Double adjClose, Trendtype trendtype, ZonedDateTime timeentered,
+//                      Double logchange, Double volatility, Double spike, Ticker ticker, Trendtype weektype,
+//                      WeeklyBasicQuote prevweek, WeeklyBasicQuote nextweek) {
+//        super(id, date, open, high, low, close, volume, adjClose, trendtype, timeentered,
+//                logchange, volatility, spike, ticker, weektype, prevweek, nextweek);
+//        this.weektype = weektype;
+//        this.prevweek = prevweek;
+//        this.nextweek = nextweek;
+//    }
 
     @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY, optional = true)
     @LazyToOne(LazyToOneOption.NO_PROXY)
@@ -47,45 +69,5 @@ public class WeeklyQuote extends QuoteBase implements java.io.Serializable {
     private DailyBasicQuote weekendday;
 
     private static final long serialVersionUID = -3994007977478642037L;
-
-    public Trendtype getWeektype() {
-        return this.weektype;
-    }
-
-    public void setWeektype(Trendtype daytype) {
-        this.weektype = daytype;
-    }
-
-    public WeeklyBasicQuote getPrevweek() {
-        return prevweek;
-    }
-
-    public void setPrevweek(WeeklyBasicQuote prevday) {
-        this.prevweek = prevday;
-    }
-
-    public WeeklyBasicQuote getNextweek() {
-        return nextweek;
-    }
-
-    public void setNextweek(WeeklyBasicQuote nextday) {
-        this.nextweek = nextday;
-    }
-
-    public DailyBasicQuote getWeekstartday() {
-        return weekstartday;
-    }
-
-    public void setWeekstartday(DailyBasicQuote weekstartday) {
-        this.weekstartday = weekstartday;
-    }
-
-    public DailyBasicQuote getWeekendday() {
-        return weekendday;
-    }
-
-    public void setWeekendday(DailyBasicQuote weekendday) {
-        this.weekendday = weekendday;
-    }
 
 }

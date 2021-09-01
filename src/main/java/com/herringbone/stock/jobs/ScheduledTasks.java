@@ -79,14 +79,14 @@ public class ScheduledTasks {
         this.cookieService = cookieService;
     }
 
-    @Scheduled(cron = "0 15 14 ? * MON-FRI", zone = "America/Denver")
+//    @Scheduled(cron = "0 15 14 ? * MON-FRI", zone = "America/Denver")
     public void loadDailyQuote() {
         log.info("Processing dailyquote");
         schedulingController.dailyQuoteJob(yahooSnpSymbol);
         schedulingController.dailyQuoteJob(yahooNasdaqSymbol);
     }
 
-    @Scheduled(cron = "0 30 14 ? * FRI", zone = "America/Denver")
+//    @Scheduled(cron = "0 30 14 ? * FRI", zone = "America/Denver")
     public void loadWeeklyQuote() {
         log.info("Processing weeklyquote");
         schedulingController.weeklyQuoteJob(yahooSnpSymbol);
@@ -94,12 +94,12 @@ public class ScheduledTasks {
         log.info("Processing weeklyquote done");
     }
 
-    @Scheduled(cron = "0 15 6 ? * MON-FRI", zone = "America/Denver")
+//    @Scheduled(cron = "0 15 6 ? * MON-FRI", zone = "America/Denver")
     public void evictCache() {
         trendService.evictAllCacheValues();
     }
 
-    @Scheduled(cron = "0 45 14 28-31 * ?", zone = "America/Denver")
+//    @Scheduled(cron = "0 45 14 28-31 * ?", zone = "America/Denver")
     public void loadMonthlyQuote() {
         ZonedDateTime dateTime = ZonedDateTime.now();
         ZonedDateTime endOfMonth =
@@ -111,7 +111,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = 86400000, initialDelay = 86400000)
+//    @Scheduled(fixedRate = 86400000, initialDelay = 86400000)
     public void reloadCookie() {
         for (String symbol : getFullSymbols()) {
             log.info("trying to Reload cookie");
@@ -122,7 +122,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = 30000, initialDelay = 60000)
+//    @Scheduled(fixedRate = 30000, initialDelay = 60000)
     public void getCurrentQuote() {
         log.info("Processing current quote");
         for (String symbol : getFullSymbols()) {
@@ -177,12 +177,13 @@ public class ScheduledTasks {
     }
 
     @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 6000)
+    // This scheduled task will load all stock quotes
     public void processHistoricalQuotes() {
         log.info("Load historical quotes");
         historicalQuoteLoader.processHistoricalQuotes();
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getQuoteBuckets() {
         for (String symbol : getSymbols()) {
             try {
@@ -195,7 +196,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getDailyUpTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -209,7 +210,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getWeeklyUpTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -224,7 +225,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getMonthlyUpTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -244,7 +245,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getDailyDownTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -258,7 +259,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getWeeklyDownTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -272,7 +273,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
+//    @Scheduled(fixedRate = SOCKET_PUBLISH_FIXED_RATE, initialDelay = 60000)
     public void getMonthlyDownTrend() {
         for (String symbol : getSymbols()) {
             try {
@@ -287,7 +288,7 @@ public class ScheduledTasks {
         }
     }
 
-    @Scheduled(fixedRate = 600000)
+//    @Scheduled(fixedRate = 600000)
     public void healthCheck() {
         String url = "https://trendapp123.herokuapp.com/";
         try {

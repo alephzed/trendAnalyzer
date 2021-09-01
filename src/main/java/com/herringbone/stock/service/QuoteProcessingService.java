@@ -15,9 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,7 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public void processQuote(YahooQuoteBean yahooQuote, Supplier<QuoteBase> quoteMapper, Period period, Class<T> trendClazz) {
-        Ticker ticker = tickerService.getTicker(yahooQuote.getSymbol());
+            Ticker ticker = tickerService.getTicker(yahooQuote.getSymbol());
 
         Double lastClose;
         // Get the last quote from the database!
@@ -101,12 +103,12 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
                 Double dayToDayChange = currentQuote.getClose() - lastQuote.getClose();
                 Double spike = dayToDayChange / oneStdDev;
                 currentQuote.setSpike(spike);
-                lastQuote.setNextPeriod(quoteLoadingFactory.getLoader(period).findBasicQuote(currentQuote.getId()));
-                quoteLoadingFactory.getLoader(period).saveQuote(lastQuote);
                 currentQuote.setVolatility(calculateVolatility(currentQuote.getLogchange(), ticker, period));
             }
-
-            quoteLoadingFactory.getLoader(period).saveQuote(currentQuote);
+            QuoteBase quote = quoteLoadingFactory.getLoader(period).saveQuote(currentQuote);
+            if (lastQuote != null) {
+                quoteLoadingFactory.getLoader(period).updateQuote(quote, lastQuote.getId());
+            }
             updateTrend(ticker, period, trendClazz);
 
         }
@@ -142,56 +144,57 @@ public class QuoteProcessingService<T extends TrendBase & PeriodTrend> {
             } else {
                 endClose = currentOpen;
             }
-
+            T updateTrend = periodTrend.getDeclaredConstructor().newInstance();
             if (latestTrendType.equals(currentQuoteTrendType)
                     && latestTrend != null) {
-                latestTrend.setTrendend(currentQuote);
-                latestTrend.setPeriodsInTrendCount(latestTrendPeriodsInCount + 1);
+                updateTrend.setTrendend(currentQuote);
+                updateTrend.setPeriodsInTrendCount(latestTrendPeriodsInCount + 1);
                 QuoteBase firstQuote = (QuoteBase) latestTrend.getTrendstart();
                 Double pointChange = currentClose - firstQuote.getClose();
                 DecimalFormat formatter = new DecimalFormat(PATTERN);
                 String formattedPointChange = formatter.format(pointChange);
                 pointChange = Double.valueOf(formattedPointChange);
-                latestTrend.setTrendpointchange(pointChange);
+                updateTrend.setTrendpointchange(pointChange);
                 // I think this is a bug here, we should be getting the start close
                 // of the trend
                 // to generate the percentage change instead of the end close.
                 // this will also require all trend percents to be recalculated as
                 // well
                 Double percentageChange = pointChange / firstQuote.getClose();
-                latestTrend.setTrendpercentagechange(percentageChange);
-                quoteLoadingFactory.getLoader(period).saveTrend(latestTrend);
+                updateTrend.setTrendpercentagechange(percentageChange);
+                updateTrend.setId(latestTrend.getId());
+                updateTrend.setTrendtype(latestTrend.getTrendtype());
+                quoteLoadingFactory.getLoader(period).updateTrend(updateTrend, currentQuote);
             }
             // now we have a new trend starting and an old trend ending
             else {
-                T trend = periodTrend.getDeclaredConstructor().newInstance();
-                trend.setTrendtype(currentQuoteTrendType);
-                if (latestTrend != null) {
-                    trend.setTrendstart(latestTrend.getTrendend());
-                } else {
-                    trend.setTrendstart(currentQuote);
-                }
-                trend.setTrendend(currentQuote);
-                trend.setTicker(ticker);
-                if (latestTrend != null) {
-                    trend.setPrevioustrend(latestTrend);
-                }
-                trend.setPeriodsInTrendCount(1);
+                T newTrend = periodTrend.getDeclaredConstructor().newInstance();
+                newTrend.setTrendtype(currentQuoteTrendType);
+                Optional.ofNullable(latestTrend).map( s->
+                    {
+                        newTrend.setTrendstart(s.getTrendend());
+                        newTrend.setPrevioustrend(latestTrend);
+                        return s;
+                    });
+                newTrend.setTrendend(currentQuote);
+                newTrend.setTicker(ticker);
+                newTrend.setPeriodsInTrendCount(1);
                 double pointChange = currentQuote.getClose() - endClose;
                 DecimalFormat formatter = new DecimalFormat(PATTERN);
                 String formattedPointChange = formatter.format(pointChange);
                 pointChange = Double.parseDouble(formattedPointChange);
-                trend.setTrendpointchange(pointChange);
-                Double percentageChange = trend.getTrendpointchange() / endClose;
-                trend.setTrendpercentagechange(percentageChange);
-                quoteLoadingFactory.getLoader(period).saveTrend(trend);
+                newTrend.setTrendpointchange(pointChange);
+                Double percentageChange = newTrend.getTrendpointchange() / endClose;
+                newTrend.setTrendpercentagechange(percentageChange);
+                TrendBase savedTrend = quoteLoadingFactory.getLoader(period).saveTrend(newTrend);
                 if (latestTrend != null) {
-                    latestTrend.setNexttrend(trend);
-                    quoteLoadingFactory.getLoader(period).saveTrend(latestTrend);
+                    updateTrend.setNexttrend(savedTrend);
+                    quoteLoadingFactory.getLoader(period).updatePreviousTrend((T)savedTrend, latestTrend.getId()); //this should be an update statement
                 }
             }
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             log.info("error {}", e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 

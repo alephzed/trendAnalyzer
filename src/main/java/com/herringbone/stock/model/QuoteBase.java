@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomDateTimeSerializer;
 import com.herringbone.stock.util.CustomTrendSerializer;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -24,9 +24,9 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 @MappedSuperclass
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public class QuoteBase<T> implements Serializable{
 
     @Id

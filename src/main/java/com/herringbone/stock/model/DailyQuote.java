@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.herringbone.stock.util.CustomQuoteSerializer;
 import com.herringbone.stock.util.CustomTrendSerializer;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,8 +18,23 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "dailyquote")
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
+@SuperBuilder
 public class DailyQuote extends QuoteBase<DailyBasicQuote> implements java.io.Serializable {
+
+//    @Builder
+//    public DailyQuote(Long id, ZonedDateTime date, Double open, Double high, Double low, Double close,
+//                      Long volume, Double adjClose, Trendtype trendtype, ZonedDateTime timeentered,
+//                      Double logchange, Double volatility, Double spike, Ticker ticker, Trendtype daytype,
+//                      DailyBasicQuote prevday, DailyBasicQuote nextday) {
+//        super(id, date, open, high, low, close, volume, adjClose, trendtype, timeentered,
+//                logchange, volatility, spike, ticker, daytype, prevday, nextday);
+//        this.daytype = daytype;
+//        this.prevday = prevday;
+//        this.nextday = nextday;
+//    }
 
     @OneToOne
     @JoinColumn(name = "PREVDAY", unique = true)

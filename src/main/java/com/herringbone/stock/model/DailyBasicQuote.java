@@ -1,8 +1,9 @@
 package com.herringbone.stock.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.Immutable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,8 +14,9 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "dailyquote")
-@Immutable
 // A non-recursive representation of the DailyQuote entity
+@Getter
+@Setter
 public class DailyBasicQuote extends QuoteBase implements java.io.Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -23,9 +25,9 @@ public class DailyBasicQuote extends QuoteBase implements java.io.Serializable {
     private Trendtype daytype;
 
     @Column(name = "PREVDAY")
-    private Long prevDay;
+    private Long prevday;
 
     @Column(name = "NEXTDAY")
-    private Long nextDay;
+    private Long nextday;
 
 }

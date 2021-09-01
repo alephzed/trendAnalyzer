@@ -9,20 +9,16 @@ spring:
         use_sql_comments: true
     show-sql: true
   datasource:
-#    url: jdbc:postgresql://quotedb:5432/quotedb
     url: jdbc:postgresql://localhost:5000/quotedb
     username: postgres
     password: quotedb
-#    url: jdbc:postgresql://localhost:5432/spring-boot-heroku-example
     driver-class-name: org.postgresql.Driver
 #    schema: classpath*:schema-h2.sql
 #    data: classpath*:data-h2.sql
 yahoo:
   index:
     symbol: IXIC
-    #    symbol: GSPC
     full:
-      #      symbol: ^GSPC
       symbol: ^IXIC
     nasdaq:
       full:

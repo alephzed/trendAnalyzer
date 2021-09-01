@@ -1,10 +1,12 @@
 package com.herringbone.stock.repository;
 
 import com.herringbone.stock.domain.Trend;
+import com.herringbone.stock.model.DailyQuote;
 import com.herringbone.stock.model.Dailytrend;
 import com.herringbone.stock.model.HistoricalTrendElement;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Repository("dailyTrend")
-public interface DailyTrendRepository extends JpaRepository<Dailytrend,Long> {
+public interface DailyTrendRepository extends CrudRepository<Dailytrend,Long> {
 
     String STRING = "from Dailytrend gt1 " +
             "left join gt1.previoustrend as gt2 " +
@@ -85,4 +87,13 @@ public interface DailyTrendRepository extends JpaRepository<Dailytrend,Long> {
                           @Param("point2") double point2, @Param("point3") double point3,
                           @Param("precisionPct") double precisionPct,
                           @Param("id") long id, @Param("tickerId") long tickerId);
+
+    @Modifying
+    @Query("update Dailytrend dt set dt.daysintrendcount = ?1, dt.trendpercentagechange = ?2, dt.trendpointchange = ?3, " +
+            "dt.trendend = ?4 where dt.id = ?5")
+    void updateTrend(Integer daysIntrendCount, Double trendPercentageChange, Double trendPointChange, DailyQuote dt, Long id);
+
+    @Modifying
+    @Query("update Dailytrend dt set dt.nexttrend = ?1 where dt.id = ?2")
+    void updateNextTrend(Dailytrend nextTrend, Long id);
 }

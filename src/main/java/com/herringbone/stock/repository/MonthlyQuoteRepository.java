@@ -4,6 +4,7 @@ import com.herringbone.stock.model.MonthlyBasicQuote;
 import com.herringbone.stock.model.MonthlyQuote;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -23,4 +24,8 @@ public interface MonthlyQuoteRepository extends JpaRepository<MonthlyQuote,Long>
 
     @Query("SELECT g FROM MonthlyBasicQuote g WHERE g.id = (:id)")
     MonthlyBasicQuote findOne(@Param("id") Long id);
+
+    @Modifying
+    @Query("update MonthlyQuote dq set dq.nextmonth = ?1 where dq.id = ?2")
+    void updateQuote(MonthlyBasicQuote monthlyQuote, Long id);
 }

@@ -2,8 +2,10 @@ package com.herringbone.stock.repository;
 
 import com.herringbone.stock.domain.Trend;
 import com.herringbone.stock.model.HistoricalTrendElement;
+import com.herringbone.stock.model.MonthlyQuote;
 import com.herringbone.stock.model.Monthlytrend;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -92,4 +94,9 @@ public interface MonthlyTrendRepository extends JpaRepository<Monthlytrend,Long>
                           @Param("point2") double point2, @Param("point3") double point3,
                           @Param("precisionPct") double precisionPct,
                           @Param("id") long id, @Param("tickerId") long tickerId);
+
+    @Modifying
+    @Query("update Monthlytrend dt set dt.monthsintrendcount = ?1, dt.trendpercentagechange = ?2, dt.trendpointchange = ?3, " +
+            "dt.trendend = ?4 where dt.id = ?5")
+    void updateTrend(Integer monthsIntrendCount, Double trendPercentageChange, Double trendPointChange, MonthlyQuote dt, Long id);
 }

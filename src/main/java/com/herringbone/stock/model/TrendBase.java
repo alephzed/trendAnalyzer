@@ -6,6 +6,7 @@ import com.herringbone.stock.util.CustomQuoteSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.OneToOne;
 import javax.persistence.Transient;
@@ -23,13 +25,14 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@SuperBuilder
 public class TrendBase<T, V> implements java.io.Serializable {
     @Id
     @GeneratedValue(strategy=IDENTITY)
     @Column(name="ID", unique=true, nullable=false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn( name = "TRENDTYPE", referencedColumnName = "TRENDVALUE")
     private Trendtype trendtype;
 
@@ -43,12 +46,12 @@ public class TrendBase<T, V> implements java.io.Serializable {
     @JsonSerialize(using = CustomQuoteSerializer.class)
     private T trendend;
 
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinColumn(name="PREVIOUSTRENDID")
     @JsonIgnore
     private V previoustrend;
 
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @OneToOne(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
     @JoinColumn(name="NEXTTRENDID")
     @JsonIgnore
     private V nexttrend;

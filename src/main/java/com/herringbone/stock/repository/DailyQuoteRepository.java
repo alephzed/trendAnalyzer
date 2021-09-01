@@ -5,6 +5,7 @@ import com.herringbone.stock.model.DailyQuote;
 import com.herringbone.stock.model.IBasicQuote;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,10 @@ public interface DailyQuoteRepository extends JpaRepository<DailyQuote,Long> {
 
     List<DailyQuote> findByTickerIdOrderByDateDesc(Long tickerId,
                                                    Pageable page);
+
+    @Modifying
+    @Query("update DailyQuote dq set dq.nextday = ?1 where dq.id = ?2")
+    void updateQuote(DailyBasicQuote dailyQuote, Long id);
 
     List<DailyQuote> findByTickerIdAndId(Long tickerId, Long id, Pageable page);
 
